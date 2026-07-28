@@ -1,4 +1,4 @@
-# Portfolio — Tarek Khoury
+# Portfolio — Tarek Alkhouri
 
 ## Getting started
 
