@@ -27,20 +27,14 @@ function About() {
           <p>
             I run{" "}
             <span className="text-chalk">Digital Builders Academy</span>, a
-            program teaching beginners web and mobile development from
-            scratch. My stack leans{" "}
+           teaching beginners web and mobile development from scratch using {" "}
             <span className="font-mono text-sky">React</span>,{" "}
             <span className="font-mono text-sky">Firebase</span>,{" "}
             <span className="font-mono text-sky">React Native</span>, and{" "}
            
             with React Native currently on the bench, in progress.
           </p>
-          <p>
-            I don't build side projects for their own sake. I build for the
-            school down the hall, the students in my class, and whoever's
-            next in line to learn — that's the pattern that runs through
-            everything below.
-          </p>
+         
         </motion.div>
       </div>
     </section>

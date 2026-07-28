@@ -13,7 +13,7 @@ const projects = [
     title: "React Furniture Store",
     tag: "02 · Full-stack commerce",
     description:
-      "An e-commerce storefront with a live admin panel — real-time Firestore listeners for inventory, product management, and a Tailwind-styled UI end to end.",
+      "An e-commerce storefront with a live admin panel — real-time Firestore listeners for inventory, product management, and a Tailwind-styled UI end to end (deployment on Vercel pending).",
     stack: ["React", "Firebase", "Tailwind CSS"],
     link: "",
   },
