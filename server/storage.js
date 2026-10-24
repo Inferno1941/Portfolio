@@ -13,17 +13,20 @@ export function initialContent() {
 }
 export async function createStore(env = process.env) {
   const backend =
-    env.DATA_BACKEND || (env.VERCEL === "1" ? "supabase" : "file");
+    env.DATA_BACKEND?.trim() || (env.VERCEL === "1" ? "supabase" : "file");
   if (env.VERCEL === "1" && backend !== "supabase")
-    throw new Error(
-      "Vercel requires DATA_BACKEND=supabase; local file storage is not persistent.",
+    throw Object.assign(
+      new Error("Vercel local file storage is not persistent."),
+      { code: "BACKEND_FILE_ON_VERCEL" },
     );
   if (backend === "supabase") {
     const { connectSupabase } = await import("./supabase-store.js");
     return connectSupabase(env);
   }
   if (backend !== "file")
-    throw new Error("DATA_BACKEND must be supabase or file.");
+    throw Object.assign(new Error("DATA_BACKEND must be supabase or file."), {
+      code: "BACKEND_INVALID",
+    });
   const dir = resolve(
     env.DATA_DIR || new URL("../storage", import.meta.url).pathname,
   );

@@ -3,6 +3,7 @@ import { timingSafeEqual, createHash } from "node:crypto";
 import { createSession, verifySession } from "./session.js";
 import { resolve, extname } from "node:path";
 import { createStore } from "./storage.js";
+import { publicBackendError } from "./backend-errors.js";
 import { validateImage } from "../src/data/imageLimits.js";
 import { validateSite } from "../src/data/site.js";
 
@@ -12,7 +13,7 @@ function getStore() {
   if (!storePromise)
     storePromise = createStore().catch((error) => {
       storePromise = undefined;
-      throw Object.assign(error, { code: "BACKEND_CONFIG" });
+      throw Object.assign(error, { code: error.code || "BACKEND_CONFIG" });
     });
   return storePromise;
 }
@@ -220,10 +221,7 @@ export default async function handler(req, res) {
     res.end(req.method === "HEAD" ? undefined : buffer);
   } catch (error) {
     if (error.code) console.error("Backend request failed:", error.code);
-    json(res, error.code ? 503 : 400, {
-      error: error.code
-        ? "Unable to complete request. Check backend configuration and server logs."
-        : error.message,
-    });
+    if (error.code) return json(res, 503, publicBackendError(error));
+    json(res, 400, { error: error.message });
   }
 }

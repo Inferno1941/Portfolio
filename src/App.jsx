@@ -18,9 +18,11 @@ function App() {
     if (isAdmin === false)
       api("portfolio")
         .then(setContent)
-        .catch(() =>
+        .catch((error) =>
           setError(
-            "Your portfolio could not be loaded. Please refresh to try again.",
+            error.code
+              ? error.message
+              : "Your portfolio could not be loaded. Please refresh to try again.",
           ),
         );
   }, [isAdmin]);

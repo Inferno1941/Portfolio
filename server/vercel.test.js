@@ -42,7 +42,7 @@ test("Vercel entry points accept parsed bodies and return JSON configuration err
     const portfolio = await fetch(`${url}/api/portfolio`);
     assert.equal(portfolio.status, 503);
     assert.match(portfolio.headers.get("content-type"), /application\/json/);
-    assert.match((await portfolio.json()).error, /backend configuration/);
+    assert.equal((await portfolio.json()).code, "SUPABASE_URL_MISSING");
   } finally {
     await new Promise((resolve) => server.close(resolve));
   }

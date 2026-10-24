@@ -7,6 +7,7 @@ export async function api(path, options = {}) {
   if (!response.ok) {
     const error = new Error(data.error || "Something went wrong.");
     error.status = response.status;
+    error.code = data.code;
     throw error;
   }
   return data;
