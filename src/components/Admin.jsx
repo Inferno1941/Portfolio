@@ -55,6 +55,7 @@ const blank = () => ({
 export default function Admin({ path }) {
   const [content, setContent] = useState(null);
   const [auth, setAuth] = useState("loading");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -98,7 +99,7 @@ export default function Admin({ path }) {
     try {
       await api("login", {
         method: "POST",
-        body: JSON.stringify({ password, path }),
+        body: JSON.stringify({ email, password, path }),
       });
       setContent(await api("admin"));
       setPassword("");
@@ -170,7 +171,17 @@ export default function Admin({ path }) {
           <h1>Welcome to Studio.</h1>
           <p>Manage your work. Make it your own.</p>
           <label>
-            Admin password
+            Email
+            <input
+              type="email"
+              autoComplete="username"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </label>
+          <label>
+            Password
             <input
               type="password"
               autoComplete="current-password"

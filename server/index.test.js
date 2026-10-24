@@ -23,6 +23,7 @@ async function start() {
       PORT: String(port),
       DATA_DIR: scratch,
       DATA_BACKEND: "file",
+      ADMIN_EMAIL: "admin@example.com",
       ADMIN_PASSWORD: "test-only-password-123",
       ADMIN_PATH: "test-only-secret-admin-path-123",
       NODE_ENV: "test",
@@ -79,8 +80,23 @@ test("authenticated portfolio lifecycle, validation, drafts, and persistence", a
       401,
     );
     assert.equal(
-      (await request("login", "POST", { password: "wrong", path: SECRET }))
-        .status,
+      (
+        await request("login", "POST", {
+          email: "admin@example.com",
+          password: "wrong",
+          path: SECRET,
+        })
+      ).status,
+      401,
+    );
+    assert.equal(
+      (
+        await request("login", "POST", {
+          email: "someone@example.com",
+          password: "test-only-password-123",
+          path: SECRET,
+        })
+      ).status,
       401,
     );
     // The old /admin link and unknown paths are not the admin route.
@@ -96,13 +112,18 @@ test("authenticated portfolio lifecycle, validation, drafts, and persistence", a
     );
     // The correct password is refused without the secret link.
     assert.equal(
-      (await request("login", "POST", { password: "test-only-password-123" }))
-        .status,
+      (
+        await request("login", "POST", {
+          email: "admin@example.com",
+          password: "test-only-password-123",
+        })
+      ).status,
       404,
     );
     assert.equal(
       (
         await request("login", "POST", {
+          email: "admin@example.com",
           password: "test-only-password-123",
           path: "/admin",
         })
@@ -110,6 +131,7 @@ test("authenticated portfolio lifecycle, validation, drafts, and persistence", a
       404,
     );
     const login = await request("login", "POST", {
+      email: "admin@example.com",
       password: "test-only-password-123",
       path: SECRET,
     });
@@ -240,6 +262,7 @@ test("authenticated portfolio lifecycle, validation, drafts, and persistence", a
     assert.deepEqual(publicData.site, site);
     assert.equal((await request("admin", "GET", null, cookie)).status, 200);
     const again = await request("login", "POST", {
+      email: "admin@example.com",
       password: "test-only-password-123",
       path: SECRET,
     });
@@ -269,6 +292,7 @@ test("authenticated portfolio lifecycle, validation, drafts, and persistence", a
       assert.equal(
         (
           await request("login", "POST", {
+            email: "admin@example.com",
             password: "incorrect",
             path: SECRET,
           })
@@ -276,8 +300,13 @@ test("authenticated portfolio lifecycle, validation, drafts, and persistence", a
         401,
       );
     assert.equal(
-      (await request("login", "POST", { password: "incorrect", path: SECRET }))
-        .status,
+      (
+        await request("login", "POST", {
+          email: "admin@example.com",
+          password: "incorrect",
+          path: SECRET,
+        })
+      ).status,
       429,
     );
   } finally {

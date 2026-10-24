@@ -8,6 +8,7 @@ test("Vercel entry points accept parsed bodies and return JSON configuration err
   process.env.DATA_BACKEND = "supabase";
   process.env.SUPABASE_URL = "";
   process.env.SUPABASE_SECRET_KEY = "";
+  process.env.ADMIN_EMAIL = "admin@example.com";
   process.env.ADMIN_PASSWORD = "test-vercel-password-123";
   process.env.ADMIN_PATH = "test-vercel-private-path-123456";
   const { default: handler } = await import("../api/portfolio.js");
@@ -35,6 +36,7 @@ test("Vercel entry points accept parsed bodies and return JSON configuration err
     assert.deepEqual(await route.json(), { admin: true });
     const login = await post("login", {
       path: process.env.ADMIN_PATH,
+      email: process.env.ADMIN_EMAIL,
       password: process.env.ADMIN_PASSWORD,
     });
     assert.equal(login.status, 200);

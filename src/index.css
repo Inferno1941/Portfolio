@@ -180,7 +180,12 @@ html {
 }
 .secondary {
   background: white;
+  color: var(--ink);
   border-color: var(--line);
+}
+.secondary:hover:not(:disabled) {
+  border-color: var(--ink);
+  transform: translateY(-1px);
 }
 .text-link {
   display: inline-flex;
@@ -1785,4 +1790,15 @@ textarea {
   position: sticky;
   top: 0;
   z-index: 10;
+}
+.contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+.contact-section .contact-copy-status {
+  margin: 12px 0 0;
+  min-height: 20px;
+  font-size: 12px;
 }

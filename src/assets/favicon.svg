@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>TK — Tarek AlKhouri</title>
+  <rect width="64" height="64" rx="15" fill="#243c32"/>
+  <path d="M10 18h23v7h-8v25h-7V25h-8z" fill="#fafbf8"/>
+  <path d="M35 18h7v13l10-13h8L47 34l13 16h-9L42 38v12h-7z" fill="#d9e9be"/>
+</svg>

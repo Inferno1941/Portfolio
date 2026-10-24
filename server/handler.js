@@ -19,16 +19,21 @@ function getStore() {
 }
 const attempts = new Map();
 const password = process.env.ADMIN_PASSWORD;
+const normalizeEmail = (value) => String(value || "").trim().toLowerCase();
+const adminEmail = normalizeEmail(process.env.ADMIN_EMAIL);
 // The admin UI lives at a secret, server-only path instead of /admin.
 const normalizePath = (value) =>
   `/${String(value || "").replace(/^\/+|\/+$/g, "")}`;
 const adminPath = process.env.ADMIN_PATH
   ? normalizePath(process.env.ADMIN_PATH)
   : "";
-const adminEnabled = password?.length >= 12 && adminPath.length >= 25;
+const adminEnabled =
+  adminEmail.includes("@") &&
+  password?.length >= 12 &&
+  adminPath.length >= 25;
 if (!adminEnabled)
   console.warn(
-    "Admin disabled. Set ADMIN_PASSWORD (12+ characters) and ADMIN_PATH (24+ random characters) in .env.",
+    "Admin disabled. Set ADMIN_EMAIL, ADMIN_PASSWORD (12+ characters) and ADMIN_PATH (24+ random characters) in .env.",
   );
 const hash = (s) => createHash("sha256").update(s).digest();
 const isAdminPath = (value) =>
@@ -160,13 +165,17 @@ export default async function handler(req, res) {
           attempts.set(key, attempt);
           return json(res, 404, { error: "Not found." });
         }
-        if (
-          typeof input.password !== "string" ||
-          !timingSafeEqual(hash(input.password), hash(password))
-        ) {
+        // Check both fields before answering so the error never reveals which one was wrong.
+        const emailMatches =
+          typeof input.email === "string" &&
+          timingSafeEqual(hash(normalizeEmail(input.email)), hash(adminEmail));
+        const passwordMatches =
+          typeof input.password === "string" &&
+          timingSafeEqual(hash(input.password), hash(password));
+        if (!emailMatches || !passwordMatches) {
           attempt.count++;
           attempts.set(key, attempt);
-          return json(res, 401, { error: "Incorrect password." });
+          return json(res, 401, { error: "Incorrect email or password." });
         }
         attempts.delete(key);
         const token = createSession(password, adminPath);

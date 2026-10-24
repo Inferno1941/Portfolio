@@ -45,7 +45,11 @@ export const siteSections = [
         "I’m Tarek AlKhouri, a frontend developer and teacher based in Lebanon. I turn complex ideas into simple, useful digital experiences.",
       ),
       workButton: text("Work button label", "Explore my work", 60),
-      contactButton: text("Email button label", "Get in touch", 60),
+      contactButton: text(
+        "Contact link label (jumps to the contact section)",
+        "Get in touch",
+        60,
+      ),
       location: text("Location", "Zahle, Lebanon", 100),
       note: text("Location tagline", "Building with purpose", 100),
     },
@@ -180,6 +184,21 @@ export const siteSections = [
         type: "email",
       },
       buttonLabel: text("Contact button label", "tarekkhouri7@gmail.com", 254),
+      copyLabel: text(
+        "Copy email button label (leave empty to hide)",
+        "Copy email",
+        60,
+      ),
+      copiedMessage: text(
+        "Message after copying",
+        "Email address copied.",
+        120,
+      ),
+      copyFailedMessage: text(
+        "Message when copying fails (the address is shown after it)",
+        "Copy this address:",
+        120,
+      ),
     },
   },
   {

@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowUpRight,
   ArrowDown,
@@ -6,12 +7,43 @@ import {
   Layers,
   ArrowRight,
   MapPin,
+  Copy,
 } from "lucide-react";
 import Projects from "./Projects";
 const cardIcons = [Code2, GraduationCap, Layers];
 export default function Portfolio({ content, preview = false }) {
   const { identity, hero, artwork, toolkit, work, about, contact, footer } =
     content.site;
+  const [copyStatus, setCopyStatus] = useState("");
+  const copyTimer = useRef();
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      clearTimeout(copyTimer.current);
+    };
+  }, []);
+  // A message about an address that has since been edited would be misleading.
+  useEffect(() => {
+    clearTimeout(copyTimer.current);
+    setCopyStatus("");
+  }, [contact.email]);
+  async function copyEmail() {
+    clearTimeout(copyTimer.current);
+    // Clearing first makes screen readers announce a repeated message again.
+    setCopyStatus("");
+    let message;
+    try {
+      await navigator.clipboard.writeText(contact.email);
+      message = contact.copiedMessage;
+    } catch {
+      message = `${contact.copyFailedMessage} ${contact.email}`.trim();
+    }
+    if (!mounted.current) return;
+    setCopyStatus(message);
+    copyTimer.current = setTimeout(() => setCopyStatus(""), 5000);
+  }
   const mail = `mailto:${contact.email}`;
   const anchor = (id) => (preview ? `#preview-${id}` : `#${id}`);
   const sectionId = (id) => (preview ? `preview-${id}` : id);
@@ -67,7 +99,10 @@ export default function Portfolio({ content, preview = false }) {
                   </a>
                 )}
                 {hero.contactButton && (
-                  <a className="text-link" href={mail}>
+                  <a
+                    className="text-link"
+                    href={contact.visible ? anchor("contact") : mail}
+                  >
                     {hero.contactButton}
                     <ArrowUpRight size={17} />
                   </a>
@@ -176,12 +211,26 @@ export default function Portfolio({ content, preview = false }) {
             <div className="eyebrow">{contact.eyebrow}</div>
             <h2 className="editable-copy">{contact.title}</h2>
             <p className="editable-copy">{contact.description}</p>
-            {contact.buttonLabel && (
-              <a className="button primary" href={mail}>
-                {contact.buttonLabel}
-                <ArrowRight size={18} />
-              </a>
-            )}
+            <div className="contact-actions">
+              {contact.buttonLabel && (
+                <a className="button primary" href={mail}>
+                  {contact.buttonLabel}
+                  <ArrowRight size={18} />
+                </a>
+              )}
+              {contact.email && contact.copyLabel && (
+                <button
+                  type="button"
+                  className="button secondary"
+                  onClick={copyEmail}
+                >
+                  <Copy size={16} /> {contact.copyLabel}
+                </button>
+              )}
+            </div>
+            <p className="contact-copy-status" role="status">
+              {copyStatus}
+            </p>
           </section>
         )}
       </div>

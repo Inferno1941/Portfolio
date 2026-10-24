@@ -11,7 +11,7 @@ npm install
 cp .env.example .env
 ```
 
-Set `ADMIN_PASSWORD` to your own unique password (at least 12 characters) and `ADMIN_PATH` to a long random string (at least 24 characters). Change `ADMIN_PATH` to revoke a leaked link. Start both the UI and API:
+Set `ADMIN_EMAIL` to the email you sign in with, `ADMIN_PASSWORD` to your own unique password (at least 12 characters) and `ADMIN_PATH` to a long random string (at least 24 characters). Change `ADMIN_PATH` to revoke a leaked link. Start both the UI and API:
 
 ```sh
 npm run dev
@@ -21,7 +21,7 @@ Open the Vite URL printed in the terminal (normally http://localhost:5173). The 
 
 ## Connect Supabase
 
-The Node API talks to Supabase with the official `@supabase/supabase-js` client and a **server-only secret key**. React keeps calling the same API; no Supabase key is ever sent to the browser. Admin sign-in still uses the password, secret admin link, and HTTP-only session cookie (not Supabase Auth).
+The Node API talks to Supabase with the official `@supabase/supabase-js` client and a **server-only secret key**. React keeps calling the same API; no Supabase key is ever sent to the browser. Admin sign-in still uses the email and password, secret admin link, and HTTP-only session cookie (not Supabase Auth).
 
 The Supabase project **portfolio** (`gtgjapgcahumlhkkbwhj`, eu-west-1) already has the schema from `supabase/migrations/`. For a new project, run that SQL in the Supabase SQL editor.
 
@@ -69,6 +69,7 @@ In **Vercel → Project → Settings → Environment Variables**, set these for 
 - `DATA_BACKEND=supabase`
 - `SUPABASE_URL`: your Supabase project URL
 - `SUPABASE_SECRET_KEY`: your server-only Supabase secret key
+- `ADMIN_EMAIL`: the email you sign in with
 - `ADMIN_PASSWORD`: your admin password, at least 12 characters
 - `ADMIN_PATH`: your private admin path, at least 24 random characters
 
