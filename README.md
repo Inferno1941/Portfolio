@@ -60,7 +60,25 @@ Line breaks are preserved. Content is plain text; HTML is displayed as text. Cha
 
 Existing file-based portfolios receive homepage defaults without changing projects. In file mode, data lives in `storage/portfolio.json` (or `DATA_DIR`). In Supabase mode the local file is only an optional migration source/backup.
 
-## Production
+## Deploy on Vercel
+
+The root `api/` functions run the Node API alongside the Vite build. `vercel.json` preserves API routes and serves the React app for the private admin URL. Vercel does not run `npm start` for this Vite deployment.
+
+In **Vercel → Project → Settings → Environment Variables**, set these for Production (and Preview if needed):
+
+- `DATA_BACKEND=supabase`
+- `SUPABASE_URL`: your Supabase project URL
+- `SUPABASE_SECRET_KEY`: your server-only Supabase secret key
+- `ADMIN_PASSWORD`: your admin password, at least 12 characters
+- `ADMIN_PATH`: your private admin path, at least 24 random characters
+
+Use the same values as your local `.env`; that file is intentionally not pushed. Redeploy after adding/changing variables. Ensure the Supabase schema migration has been applied. The Supabase URL and key must belong to the same project.
+
+Check `https://YOUR-SITE.vercel.app/api/portfolio`: it should return JSON. A 404 or HTML response means the API deployment/routing is missing; a 503 means the backend configuration or Supabase access needs attention. Vercel rejects file storage because its filesystem is not persistent. The public page only requires Supabase configuration; the admin additionally requires both admin variables.
+
+Vercel Functions have request/response size limits, so keep the complete portfolio response and each save below 4 MB, including all base64 images. For larger portfolios, the API will need pagination and per-project saves. See [Vercel function limits](https://vercel.com/docs/functions/limitations).
+
+## Other Node hosting
 
 ```sh
 npm run build
@@ -69,7 +87,7 @@ NODE_ENV=production npm start
 
 Host the Node server behind HTTPS. It serves both the built React app and API; uploading only `dist/` to static hosting is insufficient. Configure the Supabase environment variables on the host. Supabase mode does not require persistent local disk; file mode does.
 
-This is a single-owner application. Use one Node server instance while authentication sessions and login rate limits remain in memory; sessions expire after eight hours and reset on restart. Supabase data persists independently of server restarts. Requests are limited to 16 MB and portfolios to 100 projects. `PORT` configures the API and dev proxy port.
+This is a single-owner application. Signed sessions survive server/function restarts and expire after eight hours. Signing is tied to the admin password and path; changing either revokes all sessions. Sign-out clears the browser cookie, but a copied cookie stays valid until expiry or credential rotation. Login throttling is per instance; configure Vercel Firewall rate limiting for `/api/login` for a shared limit across instances. Supabase data persists independently of server restarts. Requests are limited to 16 MB and portfolios to 100 projects. `PORT` configures the API and dev proxy port.
 
 ## Checks
 

@@ -79,7 +79,8 @@ test("authenticated portfolio lifecycle, validation, drafts, and persistence", a
       401,
     );
     assert.equal(
-      (await request("login", "POST", { password: "wrong", path: SECRET })).status,
+      (await request("login", "POST", { password: "wrong", path: SECRET }))
+        .status,
       401,
     );
     // The old /admin link and unknown paths are not the admin route.
@@ -237,7 +238,7 @@ test("authenticated portfolio lifecycle, validation, drafts, and persistence", a
     assert.equal(publicData.projects[0].image, image);
     assert.equal(publicData.layout, "list");
     assert.deepEqual(publicData.site, site);
-    assert.equal((await request("admin", "GET", null, cookie)).status, 401);
+    assert.equal((await request("admin", "GET", null, cookie)).status, 200);
     const again = await request("login", "POST", {
       password: "test-only-password-123",
       path: SECRET,
@@ -260,15 +261,23 @@ test("authenticated portfolio lifecycle, validation, drafts, and persistence", a
     );
     // A legacy client saving only projects must not erase page edits.
     assert.deepEqual((await (await request("portfolio")).json()).site, site);
-    assert.equal((await request("logout", "POST", {}, newCookie)).status, 200);
-    assert.equal((await request("admin", "GET", null, newCookie)).status, 401);
+    const logout = await request("logout", "POST", {}, newCookie);
+    assert.equal(logout.status, 200);
+    assert.match(logout.headers.get("set-cookie"), /Max-Age=0/);
+    assert.equal((await request("admin")).status, 401);
     for (let i = 0; i < 10; i++)
       assert.equal(
-        (await request("login", "POST", { password: "incorrect", path: SECRET })).status,
+        (
+          await request("login", "POST", {
+            password: "incorrect",
+            path: SECRET,
+          })
+        ).status,
         401,
       );
     assert.equal(
-      (await request("login", "POST", { password: "incorrect", path: SECRET })).status,
+      (await request("login", "POST", { password: "incorrect", path: SECRET }))
+        .status,
       429,
     );
   } finally {
