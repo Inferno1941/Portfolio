@@ -1,5 +1,14 @@
-import { Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import { useState } from "react";
+import {
+  Plus,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+  ImagePlus,
+  UserRound,
+} from "lucide-react";
 import { siteSections } from "../data/site";
+import { prepareImage } from "../data/prepareImage";
 
 export default function ContentEditor({ site, onChange }) {
   function update(section, key, value) {
@@ -23,7 +32,7 @@ export default function ContentEditor({ site, onChange }) {
         <details
           className="content-section"
           key={section.id}
-          open={section.id === "hero" || section.id === "about"}
+          open={["profile", "hero", "about"].includes(section.id)}
         >
           <summary>
             {section.title}
@@ -45,7 +54,95 @@ export default function ContentEditor({ site, onChange }) {
     </div>
   );
 }
+function ImageField({ field, value, onChange, id }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [dragging, setDragging] = useState(false);
+  async function choose(file) {
+    if (!file) return;
+    setError("");
+    setBusy(true);
+    try {
+      onChange(await prepareImage(file, 1000));
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="image-field">
+      <span className="image-field-label">
+        {field.label}
+        {field.hint && <span className="field-hint">{field.hint}</span>}
+      </span>
+      <div
+        className={`image-drop ${dragging ? "dragging" : ""}`}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragging(false);
+          choose(e.dataTransfer.files?.[0]);
+        }}
+      >
+        <div className={`image-drop-preview ${busy ? "busy" : ""}`}>
+          {value ? <img src={value} alt="" /> : <UserRound size={38} />}
+        </div>
+        <div className="image-drop-copy">
+          <strong>
+            {value ? "Looking great." : "Put a face to the work."}
+          </strong>
+          <span>
+            {dragging
+              ? "Drop to upload your photo"
+              : "Drag a photo here, or choose one from your device."}
+          </span>
+          <div className="image-drop-actions">
+            <input
+              id={id}
+              type="file"
+              className="visually-hidden"
+              accept="image/jpeg,image/png,image/webp"
+              disabled={busy}
+              onChange={(e) => {
+                choose(e.target.files?.[0]);
+                e.target.value = "";
+              }}
+            />
+            <label className="button primary small" htmlFor={id}>
+              <ImagePlus size={15} />
+              {busy ? "Preparing…" : value ? "Replace photo" : "Upload photo"}
+            </label>
+            {value && (
+              <button
+                type="button"
+                className="button secondary small"
+                disabled={busy}
+                onClick={() => onChange("")}
+              >
+                <Trash2 size={15} /> Remove
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+      {error && (
+        <p className="notice error" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
 function ContentField({ field, value, onChange, id }) {
+  if (field.type === "image")
+    return (
+      <ImageField field={field} value={value} onChange={onChange} id={id} />
+    );
   if (field.type === "boolean")
     return (
       <label className="checkbox-label">

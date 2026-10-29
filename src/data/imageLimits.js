@@ -3,7 +3,7 @@ export const MAX_IMAGE_BYTES = 600 * 1024;
 export const IMAGE_LIMIT_LABEL = "600 KB";
 export function validateImage(image) {
   if (image === "") return;
-  if (typeof image !== "string") throw new Error("Invalid project image.");
+  if (typeof image !== "string") throw new Error("Invalid image.");
   const match =
     /^data:image\/(png|jpeg|webp);base64,((?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?)$/.exec(
       image,

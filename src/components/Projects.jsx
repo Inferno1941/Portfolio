@@ -1,4 +1,6 @@
+import { motion } from "motion/react";
 import { ArrowUpRight, Code2 } from "lucide-react";
+import { ease } from "./motionPresets";
 export default function Projects({
   projects,
   layout = "grid",
@@ -9,7 +11,14 @@ export default function Projects({
   return (
     <div className={`project-layout layout-${layout}`}>
       {projects.map((project, index) => (
-        <article className="project-card" key={project.id}>
+        <motion.article
+          className="project-card"
+          key={project.id}
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.15 }}
+          transition={{ duration: 0.8, delay: (index % 2) * 0.12, ease }}
+        >
           <div className={`project-visual visual-${index % 4}`}>
             {project.image ? (
               <img
@@ -65,7 +74,7 @@ export default function Projects({
               ))}
             </div>
           </div>
-        </article>
+        </motion.article>
       ))}
     </div>
   );

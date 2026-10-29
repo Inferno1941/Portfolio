@@ -16,8 +16,9 @@ import {
   ExternalLink,
   Save,
 } from "lucide-react";
+import { motion } from "motion/react";
 import { api } from "../api";
-import { MAX_IMAGE_BYTES } from "../data/imageLimits";
+import { prepareImage } from "../data/prepareImage";
 import Projects from "./Projects";
 import Portfolio from "./Portfolio";
 import ContentEditor from "./ContentEditor";
@@ -289,186 +290,195 @@ export default function Admin({ path }) {
               {notice}
             </p>
           )}
-          <div className="admin-title">
-            <div>
-              <div className="eyebrow">MAKE IT YOURS</div>
-              <h1>
-                {tab === "projects"
-                  ? "Your projects"
-                  : tab === "appearance"
-                    ? "A layout for your work."
-                    : tab === "content"
-                      ? "Your words. Your story."
-                      : "Looking good."}
-              </h1>
-              <p>
-                {tab === "projects"
-                  ? "A home for the things you’re proud to have built."
-                  : tab === "appearance"
-                    ? "Choose how your projects tell their story."
-                    : tab === "content"
-                      ? "Edit the text and sections across your portfolio."
-                      : "Preview your full portfolio with unsaved changes."}
-              </p>
+          <motion.div
+            key={tab}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className="admin-title">
+              <div>
+                <div className="eyebrow">MAKE IT YOURS</div>
+                <h1>
+                  {tab === "projects"
+                    ? "Your projects"
+                    : tab === "appearance"
+                      ? "A layout for your work."
+                      : tab === "content"
+                        ? "Your words. Your story."
+                        : "Looking good."}
+                </h1>
+                <p>
+                  {tab === "projects"
+                    ? "A home for the things you’re proud to have built."
+                    : tab === "appearance"
+                      ? "Choose how your projects tell their story."
+                      : tab === "content"
+                        ? "Edit the text and sections across your portfolio."
+                        : "Preview your full portfolio with unsaved changes."}
+                </p>
+              </div>
+              {tab === "projects" && (
+                <button
+                  className="button primary"
+                  onClick={() => setEdit(blank())}
+                >
+                  <Plus size={18} /> Add project
+                </button>
+              )}
             </div>
-            {tab === "projects" && (
-              <button
-                className="button primary"
-                onClick={() => setEdit(blank())}
-              >
-                <Plus size={18} /> Add project
-              </button>
-            )}
-          </div>
-          {tab === "content" && (
-            <ContentEditor
-              site={content.site}
-              onChange={(site) => update({ ...content, site })}
-            />
-          )}
-          {tab === "projects" && (
-            <>
-              <div className="stats">
-                <div>
-                  <span>Total projects</span>
-                  <strong>
-                    {content.projects.length.toString().padStart(2, "0")}
-                  </strong>
-                </div>
-                <div>
-                  <span>Published</span>
-                  <strong>
-                    {content.projects
-                      .filter((p) => p.published)
-                      .length.toString()
-                      .padStart(2, "0")}
-                    <i className="status-dot" />
-                  </strong>
-                </div>
-                <div>
-                  <span>Current layout</span>
-                  <strong className="stat-layout">
-                    {layouts.find((l) => l.id === content.layout)?.name}
-                  </strong>
-                </div>
-              </div>
-              <div className="project-table">
-                <div className="table-heading">
-                  <h2>Project library</h2>
-                  <span>Use the arrows to set display order</span>
-                </div>
-                {content.projects.length === 0 && (
-                  <div className="empty-state">
-                    Your next project starts here. Click “Add project” to get
-                    started.
-                  </div>
-                )}
-                {content.projects.map((p, i) => (
-                  <div className="project-row" key={p.id}>
-                    <div className={`table-thumbnail visual-${i % 4}`}>
-                      {p.image ? (
-                        <img src={p.image} alt="" />
-                      ) : (
-                        <LayoutGrid size={24} />
-                      )}
-                    </div>
-                    <div className="row-details">
-                      <strong>{p.title}</strong>
-                      <span>{p.tag || "Uncategorized"}</span>
-                    </div>
-                    <span className={`badge ${p.published ? "published" : ""}`}>
-                      {p.published ? "Published" : "Draft"}
-                    </span>
-                    <div className="row-actions">
-                      <button
-                        className="icon-button"
-                        aria-label={`Move ${p.title} up`}
-                        disabled={i === 0}
-                        onClick={() => move(i, -1)}
-                      >
-                        <ArrowUp size={16} />
-                      </button>
-                      <button
-                        className="icon-button"
-                        aria-label={`Move ${p.title} down`}
-                        disabled={i === content.projects.length - 1}
-                        onClick={() => move(i, 1)}
-                      >
-                        <ArrowDown size={16} />
-                      </button>
-                      <button
-                        className="icon-button"
-                        aria-label={`Edit ${p.title}`}
-                        onClick={() => setEdit({ ...p })}
-                      >
-                        <Pencil size={16} />
-                      </button>
-                      <button
-                        className="icon-button danger"
-                        aria-label={`Delete ${p.title}`}
-                        onClick={() => {
-                          if (
-                            confirm(
-                              `Delete “${p.title}”? Save changes to apply this deletion.`,
-                            )
-                          )
-                            update({
-                              ...content,
-                              projects: content.projects.filter(
-                                (item) => item.id !== p.id,
-                              ),
-                            });
-                        }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <p className="admin-tip">
-                Your edits stay in this workspace until you select{" "}
-                <strong>Save changes</strong>.
-              </p>
-            </>
-          )}
-          {tab === "appearance" && (
-            <>
-              <div className="layout-options">
-                {layouts.map(({ id, name, description, Icon }) => (
-                  <button
-                    key={id}
-                    className={`layout-option ${content.layout === id ? "selected" : ""}`}
-                    aria-pressed={content.layout === id}
-                    onClick={() => update({ ...content, layout: id })}
-                  >
-                    <div className={`layout-mini mini-${id}`}>
-                      <i />
-                      <i />
-                      <i />
-                      <i />
-                    </div>
-                    <div className="layout-name">
-                      <Icon size={18} />
-                      <strong>{name}</strong>
-                      {content.layout === id && <Check size={18} />}
-                    </div>
-                    <p>{description}</p>
-                  </button>
-                ))}
-              </div>
-              <h2 className="preview-title">Live preview</h2>
-              <Projects
-                projects={content.projects.filter((p) => p.published)}
-                layout={content.layout}
+            {tab === "content" && (
+              <ContentEditor
+                site={content.site}
+                onChange={(site) => update({ ...content, site })}
               />
-            </>
-          )}
-          {tab === "preview" && (
-            <div className="portfolio-preview">
-              <Portfolio content={content} preview />
-            </div>
-          )}
+            )}
+            {tab === "projects" && (
+              <>
+                <div className="stats">
+                  <div>
+                    <span>Total projects</span>
+                    <strong>
+                      {content.projects.length.toString().padStart(2, "0")}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Published</span>
+                    <strong>
+                      {content.projects
+                        .filter((p) => p.published)
+                        .length.toString()
+                        .padStart(2, "0")}
+                      <i className="status-dot" />
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Current layout</span>
+                    <strong className="stat-layout">
+                      {layouts.find((l) => l.id === content.layout)?.name}
+                    </strong>
+                  </div>
+                </div>
+                <div className="project-table">
+                  <div className="table-heading">
+                    <h2>Project library</h2>
+                    <span>Use the arrows to set display order</span>
+                  </div>
+                  {content.projects.length === 0 && (
+                    <div className="empty-state">
+                      Your next project starts here. Click “Add project” to get
+                      started.
+                    </div>
+                  )}
+                  {content.projects.map((p, i) => (
+                    <div className="project-row" key={p.id}>
+                      <div className={`table-thumbnail visual-${i % 4}`}>
+                        {p.image ? (
+                          <img src={p.image} alt="" />
+                        ) : (
+                          <LayoutGrid size={24} />
+                        )}
+                      </div>
+                      <div className="row-details">
+                        <strong>{p.title}</strong>
+                        <span>{p.tag || "Uncategorized"}</span>
+                      </div>
+                      <span
+                        className={`badge ${p.published ? "published" : ""}`}
+                      >
+                        {p.published ? "Published" : "Draft"}
+                      </span>
+                      <div className="row-actions">
+                        <button
+                          className="icon-button"
+                          aria-label={`Move ${p.title} up`}
+                          disabled={i === 0}
+                          onClick={() => move(i, -1)}
+                        >
+                          <ArrowUp size={16} />
+                        </button>
+                        <button
+                          className="icon-button"
+                          aria-label={`Move ${p.title} down`}
+                          disabled={i === content.projects.length - 1}
+                          onClick={() => move(i, 1)}
+                        >
+                          <ArrowDown size={16} />
+                        </button>
+                        <button
+                          className="icon-button"
+                          aria-label={`Edit ${p.title}`}
+                          onClick={() => setEdit({ ...p })}
+                        >
+                          <Pencil size={16} />
+                        </button>
+                        <button
+                          className="icon-button danger"
+                          aria-label={`Delete ${p.title}`}
+                          onClick={() => {
+                            if (
+                              confirm(
+                                `Delete “${p.title}”? Save changes to apply this deletion.`,
+                              )
+                            )
+                              update({
+                                ...content,
+                                projects: content.projects.filter(
+                                  (item) => item.id !== p.id,
+                                ),
+                              });
+                          }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="admin-tip">
+                  Your edits stay in this workspace until you select{" "}
+                  <strong>Save changes</strong>.
+                </p>
+              </>
+            )}
+            {tab === "appearance" && (
+              <>
+                <div className="layout-options">
+                  {layouts.map(({ id, name, description, Icon }) => (
+                    <button
+                      key={id}
+                      className={`layout-option ${content.layout === id ? "selected" : ""}`}
+                      aria-pressed={content.layout === id}
+                      onClick={() => update({ ...content, layout: id })}
+                    >
+                      <div className={`layout-mini mini-${id}`}>
+                        <i />
+                        <i />
+                        <i />
+                        <i />
+                      </div>
+                      <div className="layout-name">
+                        <Icon size={18} />
+                        <strong>{name}</strong>
+                        {content.layout === id && <Check size={18} />}
+                      </div>
+                      <p>{description}</p>
+                    </button>
+                  ))}
+                </div>
+                <h2 className="preview-title">Live preview</h2>
+                <Projects
+                  projects={content.projects.filter((p) => p.published)}
+                  layout={content.layout}
+                />
+              </>
+            )}
+            {tab === "preview" && (
+              <div className="portfolio-preview">
+                <Portfolio content={content} preview />
+              </div>
+            )}
+          </motion.div>
         </div>
       </main>
       {edit && (
@@ -505,32 +515,12 @@ function ProjectEditor({ project, onClose, onSave }) {
   const field = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
   async function upload(e) {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
     setError("");
-    if (
-      !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
-      file.size > MAX_IMAGE_BYTES
-    ) {
-      setError("Choose a JPG, PNG, or WebP image 600 KB or smaller.");
-      e.target.value = "";
-      return;
-    }
     setUploading(true);
     try {
-      const image = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(new Error("Image could not be read."));
-        reader.readAsDataURL(file);
-      });
-      await new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = resolve;
-        img.onerror = () =>
-          reject(new Error("This image could not be opened."));
-        img.src = image;
-      });
-      field("image", image);
+      field("image", await prepareImage(file, 1600));
     } catch (e) {
       setError(e.message);
     } finally {
@@ -632,7 +622,8 @@ function ProjectEditor({ project, onClose, onSave }) {
             <label htmlFor="project-image">
               Cover image{" "}
               <span className="field-hint">
-                JPG, PNG, WebP · Max 600 KB · Landscape recommended
+                JPG, PNG, WebP · Landscape recommended · Large images are
+                resized automatically
               </span>
             </label>
             {draft.image && (

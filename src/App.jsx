@@ -46,8 +46,11 @@ function App() {
     );
   if (!content)
     return (
-      <main className="wrap section" role="status">
-        Loading portfolio…
+      <main className="page-loader" role="status">
+        <span className="brand" aria-hidden="true">
+          tk<span>.</span>
+        </span>
+        <span className="visually-hidden">Loading portfolio…</span>
       </main>
     );
   return (

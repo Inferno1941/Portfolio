@@ -1,3 +1,5 @@
+import { validateImage } from "./imageLimits.js";
+
 // Shared defaults and field definitions keep the editor and API in agreement.
 const text = (label, value, max = 180) => ({
   label,
@@ -30,6 +32,29 @@ export const siteSections = [
       workLabel: text("Work navigation label", "Work", 40),
       aboutLabel: text("About navigation label", "About", 40),
       contactLabel: text("Contact navigation label", "Let’s talk", 40),
+    },
+  },
+  {
+    id: "profile",
+    title: "Profile photo",
+    fields: {
+      visible: toggle("Show my photo in the introduction"),
+      image: {
+        label: "Your photo",
+        hint: "JPG, PNG, or WebP. A portrait (taller than wide) looks best. Large photos are resized automatically.",
+        default: "",
+        type: "image",
+      },
+      alt: text(
+        "Photo description (read aloud by screen readers)",
+        "Portrait of Tarek AlKhouri",
+        160,
+      ),
+      caption: text(
+        "Greeting next to the photo (leave empty to hide)",
+        "Hi, I’m Tarek",
+        80,
+      ),
     },
   },
   {
@@ -251,6 +276,12 @@ export function validateSite(input = {}) {
               typeof v === "string" && v.length <= max;
             if (field.type === "boolean") {
               if (typeof value !== "boolean") error();
+            } else if (field.type === "image") {
+              try {
+                validateImage(value);
+              } catch (e) {
+                throw new Error(`Check ${section.title}: ${e.message}`);
+              }
             } else if (field.type === "list") {
               if (
                 !Array.isArray(value) ||
