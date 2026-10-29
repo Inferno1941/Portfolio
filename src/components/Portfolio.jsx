@@ -12,6 +12,7 @@ import {
 import {
   ArrowUpRight,
   ArrowDown,
+  Asterisk,
   Code2,
   GraduationCap,
   Layers,
@@ -180,7 +181,9 @@ function HeroVisual({ profile, artwork, photo, pointer }) {
         animate={{ opacity: 1, scale: 1, rotate: 0 }}
         transition={{ duration: 1.1, delay: 0.9, ease }}
       >
-        <span>✳</span>
+        <span>
+          <Asterisk size="1em" strokeWidth={1.6} />
+        </span>
       </motion.div>
     </div>
   );
@@ -206,7 +209,9 @@ function Marquee({ items }) {
             {set.map((item, i) => (
               <strong key={i}>
                 {item}
-                <i>✳</i>
+                <i>
+                  <Asterisk size={14} strokeWidth={2.4} />
+                </i>
               </strong>
             ))}
           </div>
